@@ -1,5 +1,8 @@
-from typing import List, Callable
+from nptyping import NDArray
+from PIL import Image
+from typing import Any, Callable, List
 import copy
+import numpy as np
 import textwrap
 
 
@@ -74,13 +77,51 @@ def parse_grid(text: str) -> List[List[bool]]:
     return [[char == "*" for char in line] for line in text.splitlines()]
 
 
-N = 20
-grid = [[False] * N for _ in range(N)]
+def add_grid_frame(grid: List[List[bool]], generation: int) -> None:
+    """Add the grid to the grid_frames"""
 
+    arr_grid = enlarge_image(
+        np.array(grid, dtype="uint8") * 255, PIXELS_PER_CELL
+    )
+    image = Image.fromarray(arr_grid, mode="L").convert("P")
+    grid_frames.append(image)
+
+
+def enlarge_image(
+    image: NDArray[NDArray[int]], ratio: int
+) -> NDArray[NDArray[int]]:
+    enlarged = np.empty(
+        shape=(image.shape[0] * ratio, image.shape[1] * ratio),
+        dtype=image.dtype,
+    )
+    for i in range(enlarged.shape[0]):
+        for j in range(enlarged.shape[1]):
+            enlarged[i][j] = image[i // ratio][j // ratio]
+    return enlarged
+
+
+def save_frames(grid_frames: List[Image.Image]) -> None:
+    grid_frames[0].save(
+        "glider.gif",
+        save_all=True,
+        append_images=grid_frames[1:],
+        duration=DURATION,
+        loop=0,
+    )
+
+
+N = 40
+MAX_GEN = 120
+PIXELS_PER_CELL = 10
+DURATION = 50
+
+grid = [[False] * N for _ in range(N)]
 grid[1][2] = True
 grid[2][3] = True
 grid[3][1] = True
 grid[3][2] = True
 grid[3][3] = True
 
-driver(grid, handler=grid_print, max_gen=20)
+grid_frames: List[Image.Image] = []
+driver(grid, handler=add_grid_frame, max_gen=MAX_GEN)
+save_frames(grid_frames)
