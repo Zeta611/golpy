@@ -1,6 +1,6 @@
 from nptyping import NDArray
 from PIL import Image
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Tuple
 import copy
 import numpy as np
 import textwrap
@@ -73,8 +73,17 @@ def grid_print(grid: List[List[bool]], generation: int) -> None:
         print()
 
 
-def parse_grid(text: str) -> List[List[bool]]:
-    return [[char == "*" for char in line] for line in text.splitlines()]
+def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> List[List[bool]]:
+    width, height = size
+    grid = [[False] * width for _ in range(height)]
+    for i, line in enumerate(text.splitlines()):
+        if i >= height:
+            break
+        for j, char in enumerate(line):
+            if j >= width:
+                break
+            grid[i][j] = char == live
+    return grid
 
 
 def add_grid_frame(grid: List[List[bool]], generation: int) -> None:
@@ -100,9 +109,9 @@ def enlarge_image(
     return enlarged
 
 
-def save_frames(grid_frames: List[Image.Image]) -> None:
+def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
     grid_frames[0].save(
-        "glider.gif",
+        filename,
         save_all=True,
         append_images=grid_frames[1:],
         duration=DURATION,
@@ -110,18 +119,28 @@ def save_frames(grid_frames: List[Image.Image]) -> None:
     )
 
 
-N = 40
-MAX_GEN = 120
+WIDTH = 60
+HEIGHT = 40
+MAX_GEN = 300
 PIXELS_PER_CELL = 10
 DURATION = 50
 
-grid = [[False] * N for _ in range(N)]
-grid[1][2] = True
-grid[2][3] = True
-grid[3][1] = True
-grid[3][2] = True
-grid[3][3] = True
+glider_gun = parse_grid(
+    """\
+........................O
+......................O.O
+............OO......OO............OO
+...........O...O....OO............OO
+OO........O.....O...OO
+OO........O...O.OO....O.O
+..........O.....O.......O
+...........O...O
+............OO
+""",
+    size=(WIDTH, HEIGHT),
+    live="O",
+)
 
 grid_frames: List[Image.Image] = []
-driver(grid, handler=add_grid_frame, max_gen=MAX_GEN)
-save_frames(grid_frames)
+driver(glider_gun, handler=add_grid_frame, max_gen=MAX_GEN)
+save_frames(grid_frames, "glider_gun.gif")
