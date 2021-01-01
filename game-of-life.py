@@ -1,11 +1,37 @@
+from functools import wraps
 from nptyping import NDArray
 from PIL import Image
 from typing import Any, Callable, List, Tuple
 import copy
 import numpy as np
 import textwrap
+import time
 
 
+def timeit(f):
+    timeit.records = {}
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not DEBUG:
+            return f(*args, **kwargs)
+        name = f.__name__
+
+        start = time.time()
+        result = f(*args, **kwargs)
+        end = time.time()
+
+        elapsed = end - start
+        if name in timeit.records:
+            timeit.records[name] += elapsed
+        else:
+            timeit.records[name] = elapsed
+        return result
+
+    return wrapper
+
+
+@timeit
 def count_live_neighbors(grid: List[List[bool]], x: int, y: int) -> int:
     """Returns the number of live neighbors of grid[y][x]. Neighbors out of the boundaries of the grid are considered dead."""
 
@@ -27,6 +53,7 @@ def count_live_neighbors(grid: List[List[bool]], x: int, y: int) -> int:
     return cnt
 
 
+@timeit
 def progress(grid: List[List[bool]]) -> None:
     """Progress grid to the next generation."""
 
@@ -48,6 +75,7 @@ def progress(grid: List[List[bool]]) -> None:
                 grid[y][x] = False
 
 
+@timeit
 def driver(
     grid: List[List[bool]],
     handler: Callable[[List[List[bool]], int], None],
@@ -60,6 +88,7 @@ def driver(
         progress(grid)
 
 
+@timeit
 def grid_print(grid: List[List[bool]], generation: int) -> None:
     """Print the formatted grid on screen."""
 
@@ -73,7 +102,10 @@ def grid_print(grid: List[List[bool]], generation: int) -> None:
         print()
 
 
-def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> List[List[bool]]:
+@timeit
+def parse_grid(
+    text: str, size: Tuple[int, int], live: str = "*"
+) -> List[List[bool]]:
     width, height = size
     grid = [[False] * width for _ in range(height)]
     for i, line in enumerate(text.splitlines()):
@@ -86,6 +118,7 @@ def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> List[List[b
     return grid
 
 
+@timeit
 def add_grid_frame(grid: List[List[bool]], generation: int) -> None:
     """Add the grid to the grid_frames"""
 
@@ -96,19 +129,16 @@ def add_grid_frame(grid: List[List[bool]], generation: int) -> None:
     grid_frames.append(image)
 
 
+@timeit
 def enlarge_image(
     image: NDArray[NDArray[int]], ratio: int
 ) -> NDArray[NDArray[int]]:
-    enlarged = np.empty(
-        shape=(image.shape[0] * ratio, image.shape[1] * ratio),
-        dtype=image.dtype,
-    )
-    for i in range(enlarged.shape[0]):
-        for j in range(enlarged.shape[1]):
-            enlarged[i][j] = image[i // ratio][j // ratio]
-    return enlarged
+    """Enlarges each pixel in the image to a ratio * ratio square block."""
+
+    return np.kron(image, np.ones((ratio, ratio), dtype="uint8"))
 
 
+@timeit
 def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
     grid_frames[0].save(
         filename,
@@ -118,6 +148,8 @@ def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
         loop=0,
     )
 
+
+DEBUG = False
 
 WIDTH = 60
 HEIGHT = 40
@@ -144,3 +176,4 @@ OO........O...O.OO....O.O
 grid_frames: List[Image.Image] = []
 driver(glider_gun, handler=add_grid_frame, max_gen=MAX_GEN)
 save_frames(grid_frames, "glider_gun.gif")
+print(timeit.records)
