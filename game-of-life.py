@@ -1,6 +1,6 @@
 from functools import wraps
-from nptyping import NDArray
 from PIL import Image
+from scipy import signal
 from typing import Any, Callable, List, Tuple
 import copy
 import numpy as np
@@ -32,53 +32,35 @@ def timeit(f):
 
 
 @timeit
-def count_live_neighbors(grid: List[List[bool]], x: int, y: int) -> int:
-    """Returns the number of live neighbors of grid[y][x]. Neighbors out of the boundaries of the grid are considered dead."""
-
-    width = len(grid[0])
-    height = len(grid)
-
-    dxs = [-1, 0, 1]
-    dys = [-1, 0, 1]
-
-    cnt = 0
-
-    for dx in dxs:
-        for dy in dys:
-            if dx == dy == 0:
-                continue
-            if x + dx < 0 or x + dx >= width or y + dy < 0 or y + dy >= height:
-                continue
-            cnt += grid[y + dy][x + dx]
-    return cnt
-
-
-@timeit
-def progress(grid: List[List[bool]]) -> None:
+def progress(grid: np.ndarray) -> None:
     """Progress grid to the next generation."""
 
-    width = len(grid[0])
-    height = len(grid)
-
+    # neighbor_cnts[y, x] is the number of live neighbors of grid[y, x].
+    neighbor_cnts = signal.convolve2d(
+        grid,
+        np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype="uint8"),
+        mode="same",
+    )
+    height, width = grid.shape
     old_grid = copy.deepcopy(grid)
 
     for y in range(height):
         for x in range(width):
-            live_neighbors_cnt = count_live_neighbors(old_grid, x, y)
-            alive = old_grid[y][x]
+            live_neighbors_cnt = neighbor_cnts[y, x]
+            alive = old_grid[y, x]
 
             if alive and 2 <= live_neighbors_cnt <= 3:
-                continue  # grid[y][x] stays alive
+                continue  # grid[y, x] stays alive
             elif not alive and live_neighbors_cnt == 3:
-                grid[y][x] = True
+                grid[y, x] = 1
             else:
-                grid[y][x] = False
+                grid[y, x] = 0
 
 
 @timeit
 def driver(
-    grid: List[List[bool]],
-    handler: Callable[[List[List[bool]], int], None],
+    grid: np.ndarray,
+    handler: Callable[[np.ndarray, int], None],
     max_gen: int = 100,
 ) -> None:
     """Progresses the grid max_gen generations. Each generation of the grid is processed by the handler."""
@@ -88,8 +70,7 @@ def driver(
         progress(grid)
 
 
-@timeit
-def grid_print(grid: List[List[bool]], generation: int) -> None:
+def grid_print(grid: np.ndarray, generation: int) -> None:
     """Print the formatted grid on screen."""
 
     print(f"==== GEN {generation} ====")
@@ -105,34 +86,30 @@ def grid_print(grid: List[List[bool]], generation: int) -> None:
 @timeit
 def parse_grid(
     text: str, size: Tuple[int, int], live: str = "*"
-) -> List[List[bool]]:
+) -> np.ndarray:
     width, height = size
-    grid = [[False] * width for _ in range(height)]
+    grid = np.zeros((height, width), dtype="uint8")
     for i, line in enumerate(text.splitlines()):
         if i >= height:
             break
         for j, char in enumerate(line):
             if j >= width:
                 break
-            grid[i][j] = char == live
+            grid[i, j] = char == live
     return grid
 
 
 @timeit
-def add_grid_frame(grid: List[List[bool]], generation: int) -> None:
+def add_grid_frame(grid: np.ndarray, generation: int) -> None:
     """Add the grid to the grid_frames"""
 
-    arr_grid = enlarge_image(
-        np.array(grid, dtype="uint8") * 255, PIXELS_PER_CELL
-    )
+    arr_grid = enlarge_image(grid * 255, PIXELS_PER_CELL)
     image = Image.fromarray(arr_grid, mode="L").convert("P")
     grid_frames.append(image)
 
 
 @timeit
-def enlarge_image(
-    image: NDArray[NDArray[int]], ratio: int
-) -> NDArray[NDArray[int]]:
+def enlarge_image(image: np.ndarray, ratio: int) -> np.ndarray:
     """Enlarges each pixel in the image to a ratio * ratio square block."""
 
     return np.kron(image, np.ones((ratio, ratio), dtype="uint8"))
