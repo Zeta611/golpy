@@ -16,9 +16,9 @@ def timeit(f):
             return f(*args, **kwargs)
         name = f.__name__
 
-        start = time.time()
+        start = time.perf_counter()
         result = f(*args, **kwargs)
-        end = time.time()
+        end = time.perf_counter()
 
         elapsed = end - start
         if name in timeit.records:
@@ -83,9 +83,7 @@ def grid_print(grid: np.ndarray, generation: int) -> None:
 
 
 @timeit
-def parse_grid(
-    text: str, size: Tuple[int, int], live: str = "*"
-) -> np.ndarray:
+def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> np.ndarray:
     width, height = size
     grid = np.zeros((height, width), dtype="uint8")
     for i, line in enumerate(text.splitlines()):
