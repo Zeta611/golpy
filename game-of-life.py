@@ -1,37 +1,14 @@
 import copy
-import time
-from functools import wraps
 from typing import Callable, List, Tuple
 
 import numpy as np
 from PIL import Image
 from scipy import signal
 
-
-def timeit(f):
-    timeit.records = {}
-
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        if not DEBUG:
-            return f(*args, **kwargs)
-        name = f.__name__
-
-        start = time.perf_counter()
-        result = f(*args, **kwargs)
-        end = time.perf_counter()
-
-        elapsed = end - start
-        if name in timeit.records:
-            timeit.records[name] += elapsed
-        else:
-            timeit.records[name] = elapsed
-        return result
-
-    return wrapper
+from util import timeit
 
 
-@timeit
+@timeit()
 def progress(grid: np.ndarray) -> None:
     """Progress grid to the next generation."""
 
@@ -57,7 +34,7 @@ def progress(grid: np.ndarray) -> None:
                 grid[y, x] = 0
 
 
-@timeit
+@timeit()
 def driver(
     grid: np.ndarray,
     handler: Callable[[np.ndarray, int], None],
@@ -83,7 +60,7 @@ def grid_print(grid: np.ndarray, generation: int) -> None:
         print()
 
 
-@timeit
+@timeit()
 def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> np.ndarray:
     width, height = size
     grid = np.zeros((height, width), dtype="uint8")
@@ -97,7 +74,7 @@ def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> np.ndarray:
     return grid
 
 
-@timeit
+@timeit()
 def add_grid_frame(grid: np.ndarray, generation: int) -> None:
     """Add the grid to the grid_frames"""
 
@@ -106,14 +83,14 @@ def add_grid_frame(grid: np.ndarray, generation: int) -> None:
     grid_frames.append(image)
 
 
-@timeit
+@timeit()
 def enlarge_image(image: np.ndarray, ratio: int) -> np.ndarray:
     """Enlarges each pixel in the image to a ratio * ratio square block."""
 
     return np.kron(image, np.ones((ratio, ratio), dtype="uint8"))
 
 
-@timeit
+@timeit()
 def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
     grid_frames[0].save(
         filename,
@@ -124,31 +101,42 @@ def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
     )
 
 
-DEBUG = False
+if __name__ == "__main__":
+    import argparse
 
-WIDTH = 60
-HEIGHT = 40
-MAX_GEN = 300
-PIXELS_PER_CELL = 10
-DURATION = 50
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", action="store_true")
+    args = parser.parse_args()
+    if args.verbose:
+        timeit.on = True
+    else:
+        timeit.on = False
 
-glider_gun = parse_grid(
-    """\
-........................O
-......................O.O
-............OO......OO............OO
-...........O...O....OO............OO
-OO........O.....O...OO
-OO........O...O.OO....O.O
-..........O.....O.......O
-...........O...O
-............OO
-""",
-    size=(WIDTH, HEIGHT),
-    live="O",
-)
+    WIDTH = 60
+    HEIGHT = 40
+    MAX_GEN = 300
+    PIXELS_PER_CELL = 10
+    DURATION = 50
 
-grid_frames: List[Image.Image] = []
-driver(glider_gun, handler=add_grid_frame, max_gen=MAX_GEN)
-save_frames(grid_frames, "glider_gun.gif")
-print(timeit.records)
+    glider_gun = parse_grid(
+        """\
+    ........................O
+    ......................O.O
+    ............OO......OO............OO
+    ...........O...O....OO............OO
+    OO........O.....O...OO
+    OO........O...O.OO....O.O
+    ..........O.....O.......O
+    ...........O...O
+    ............OO
+    """,
+        size=(WIDTH, HEIGHT),
+        live="O",
+    )
+
+    grid_frames: List[Image.Image] = []
+    driver(glider_gun, handler=add_grid_frame, max_gen=MAX_GEN)
+    save_frames(grid_frames, "glider_gun.gif")
+
+    if timeit.on:
+        print(timeit.records)
