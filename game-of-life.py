@@ -1,5 +1,7 @@
+import argparse
 from functools import partial
-from typing import Callable, List, Tuple
+from pathlib import Path
+from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 from PIL import Image
@@ -121,16 +123,36 @@ def grid_print(grid: np.ndarray, generation: int) -> None:
 
 
 @timeit()
-def parse_grid(text: str, size: Tuple[int, int], live: str = "*") -> np.ndarray:
+def parse_grid(
+    text: str, size: Tuple[int, int], pos: str = "TL", live: str = "O"
+) -> np.ndarray:
+    lines = text.strip().splitlines()
+    text_width = max(len(line) for line in lines)
+    text_height = len(lines)
+
     width, height = size
+    if width < text_width or height < text_height:
+        raise ValueError(
+            f"given text of size {(text_width, text_height)} larger than grid size {size}"
+        )
+
     grid = np.zeros((height, width), dtype="uint8")
-    for i, line in enumerate(text.splitlines()):
+
+    pos_idx: Dict[str, Tuple[int, int]] = {
+        "TL": (0, 0),
+        "TR": (0, width - text_width),
+        "BL": (height - text_height, 0),
+        "BR": (height - text_height, width - text_width),
+    }
+    offset = pos_idx[pos.upper()]
+
+    for i, line in enumerate(lines):
         if i >= height:
             break
         for j, char in enumerate(line):
             if j >= width:
                 break
-            grid[i, j] = char == live
+            grid[i + offset[0], j + offset[1]] = char == live
     return grid
 
 
@@ -161,7 +183,7 @@ def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
     )
 
 
-def get_demo(name: str, size: Tuple[int, int]) -> np.ndarray:
+def get_demo(name: str, size: Tuple[int, int], pos: str = "TL") -> np.ndarray:
     if name == "random":
         return np.random.randint(0, 2, size, dtype="uint8")
     demos = {
@@ -177,8 +199,8 @@ def get_demo(name: str, size: Tuple[int, int]) -> np.ndarray:
     ...........O...O
     ............OO
     """,
-            size=size,
-            live="O",
+            size,
+            pos,
         ),
     }
 
@@ -187,7 +209,6 @@ def get_demo(name: str, size: Tuple[int, int]) -> np.ndarray:
 
 if __name__ == "__main__":
     # Setup command line options
-    import argparse
 
     parser = argparse.ArgumentParser()
 
@@ -206,6 +227,7 @@ if __name__ == "__main__":
     option_group = parser.add_argument_group()
     option_group.add_argument("-M", "--max-gen", type=int, default=300)
     option_group.add_argument("--ppc", type=int, default=1)
+    option_group.add_argument("-P", "--pos", default="TL")
 
     dev_group = parser.add_argument_group()
     dev_group.add_argument("-p", "--profile", action="store_true")
@@ -216,15 +238,15 @@ if __name__ == "__main__":
     size = (args.width, args.height)
     max_gen = args.max_gen
     ppc = args.ppc
+    pos = args.pos
     DURATION = 50
 
     timeit.on = args.profile
 
-    if getattr(args, "in"):
-        grid = None
-        raise NotImplementedError()
+    if in_file := getattr(args, "in"):
+        grid = parse_grid(Path(in_file).read_text(), size, pos)
     else:  # demo mode
-        grid = get_demo(args.demo, size)
+        grid = get_demo(args.demo, size, pos)
 
     # Run Game of Life
     grid_frames: List[Image.Image] = []
