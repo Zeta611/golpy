@@ -1,5 +1,5 @@
-from typing import Callable, List, Tuple
 from functools import partial
+from typing import Callable, List, Tuple
 
 import numpy as np
 from PIL import Image
