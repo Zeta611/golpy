@@ -1,5 +1,6 @@
 import argparse
-from functools import partial
+import functools
+import textwrap
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple
 
@@ -126,7 +127,7 @@ def grid_print(grid: np.ndarray, generation: int) -> None:
 def parse_grid(
     text: str, size: Tuple[int, int], pos: str = "TL", live: str = "O"
 ) -> np.ndarray:
-    lines = text.strip().splitlines()
+    lines = textwrap.dedent(text).strip().splitlines()
     text_width = max(len(line) for line in lines)
     text_height = len(lines)
 
@@ -139,6 +140,11 @@ def parse_grid(
     grid = np.zeros((height, width), dtype="uint8")
 
     pos_idx: Dict[str, Tuple[int, int]] = {
+        "C": (height // 2 - text_height // 2, width // 2 - text_width // 2),
+        "T": (0, width // 2 - text_width // 2),
+        "B": (height - text_height, width // 2 - text_width // 2),
+        "L": (height // 2 - text_height // 2, 0),
+        "R": (height // 2 - text_height // 2, width - text_width),
         "TL": (0, 0),
         "TR": (0, width - text_width),
         "BL": (height - text_height, 0),
@@ -256,7 +262,7 @@ if __name__ == "__main__":
     else:
         driver(
             grid,
-            handler=partial(add_grid_frame, pixels_per_cell=ppc),
+            handler=functools.partial(add_grid_frame, pixels_per_cell=ppc),
             max_gen=max_gen,
         )
         save_frames(grid_frames, filename)
