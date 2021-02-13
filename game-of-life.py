@@ -125,7 +125,7 @@ def grid_print(grid: np.ndarray, generation: int) -> None:
 
 @timeit()
 def parse_grid(
-    text: str, size: Tuple[int, int], pos: str = "TL", live: str = "O"
+    text: str, size: Tuple[int, int], pos: str = "C", live: str = "O"
 ) -> np.ndarray:
     lines = textwrap.dedent(text).strip().splitlines()
     text_width = max(len(line) for line in lines)
@@ -189,9 +189,10 @@ def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
     )
 
 
-def get_demo(name: str, size: Tuple[int, int], pos: str = "TL") -> np.ndarray:
+def get_demo(name: str, size: Tuple[int, int], pos: str = "C") -> np.ndarray:
     if name == "random":
         return np.random.randint(0, 2, size, dtype="uint8")
+
     demos = {
         "glidergun": lambda: parse_grid(
             """\
@@ -204,6 +205,21 @@ def get_demo(name: str, size: Tuple[int, int], pos: str = "TL") -> np.ndarray:
     ..........O.....O.......O
     ...........O...O
     ............OO
+    """,
+            size,
+            pos,
+        ),
+        "glidergen": lambda: parse_grid(
+            """\
+    ....OOOO
+
+    ..OOOOOOOO
+
+    OOOOOOOOOOOO
+
+    ..OOOOOOOO
+
+    ....OOOO
     """,
             size,
             pos,
@@ -233,7 +249,7 @@ if __name__ == "__main__":
     option_group = parser.add_argument_group()
     option_group.add_argument("-M", "--max-gen", type=int, default=300)
     option_group.add_argument("--ppc", type=int, default=1)
-    option_group.add_argument("-P", "--pos", default="TL")
+    option_group.add_argument("-P", "--pos", default="C")
 
     dev_group = parser.add_argument_group()
     dev_group.add_argument("-p", "--profile", action="store_true")
