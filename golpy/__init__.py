@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Tuple
 import numpy as np
 from PIL import Image
 
-from util import timeit
+from .util import timeit
 
 
 @timeit()
@@ -163,7 +163,12 @@ def parse_grid(
 
 
 @timeit()
-def add_grid_frame(grid: np.ndarray, generation: int, pixels_per_cell: int) -> None:
+def add_grid_frame(
+    grid: np.ndarray,
+    generation: int,
+    grid_frames: List[np.ndarray],
+    pixels_per_cell: int,
+) -> None:
     """Add the grid to the grid_frames"""
 
     arr_grid = enlarge_image(grid * 255, pixels_per_cell)
@@ -179,12 +184,14 @@ def enlarge_image(image: np.ndarray, ratio: int) -> np.ndarray:
 
 
 @timeit()
-def save_frames(grid_frames: List[Image.Image], filename: str) -> None:
+def save_frames(
+    grid_frames: List[Image.Image], filename: str, duration: int = 50
+) -> None:
     grid_frames[0].save(
         filename,
         save_all=True,
         append_images=grid_frames[1:],
-        duration=DURATION,
+        duration=duration,
         loop=0,
     )
 
@@ -229,7 +236,7 @@ def get_demo(name: str, size: Tuple[int, int], pos: str = "C") -> np.ndarray:
     return demos[name]()
 
 
-if __name__ == "__main__":
+def main() -> None:
     # Setup command line options
 
     parser = argparse.ArgumentParser()
@@ -278,10 +285,16 @@ if __name__ == "__main__":
     else:
         driver(
             grid,
-            handler=functools.partial(add_grid_frame, pixels_per_cell=ppc),
+            handler=functools.partial(
+                add_grid_frame, grid_frames=grid_frames, pixels_per_cell=ppc
+            ),
             max_gen=max_gen,
         )
-        save_frames(grid_frames, filename)
+        save_frames(grid_frames, filename, DURATION)
 
     if timeit.on:
         print(timeit.records)
+
+
+if __name__ == "__main__":
+    main()

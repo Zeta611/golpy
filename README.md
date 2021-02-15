@@ -1,19 +1,17 @@
-# py-game-of-life
-Efficient Conway's Game of Life implemented in Python using NumPy.
+# GoLPy
+GoLPy is an efficient Conway's Game of Life implemented in Python using NumPy.
 
 ## Example Output
 The following GIF can be generated using the command:
 ```sh
-python game-of-life.py --demo glidergun --out glider_gun.gif --ppc 10 --pos TL -W60 -H40
+life --demo glidergun --out glider_gun.gif --ppc 10 --pos TL -W60 -H40
 ```
 
 ![The Gosper Glider Gun](glider_gun.gif)
 
 ## Usage
 ```
-usage: game-of-life.py [-h] (-i IN | -d DEMO) [-o OUT | --debug-print]
-                       [-W WIDTH] [-H HEIGHT] [-M MAX_GEN] [--ppc PPC]
-                       [-P POS] [-p]
+usage: life [-h] (-i IN | -d DEMO) [-o OUT | --debug-print] [-W WIDTH] [-H HEIGHT] [-M MAX_GEN] [--ppc PPC] [-P POS] [-p]
 
 optional arguments:
   -h, --help            show this help message and exit
