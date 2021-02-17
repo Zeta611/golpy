@@ -14,6 +14,11 @@ life --demo glidergun --out glider_gun.gif --ppc 10 --pos TL -W60 -H40
 
 ![The Gosper Glider Gun](glider_gun.gif)
 
+## Installation
+```
+pip install golpy
+```
+
 ## Usage
 ```
 usage: life [-h] (-i GRID_INPUT | -d DEMO) [-o FILE | --debug-print]
