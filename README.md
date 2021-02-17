@@ -16,23 +16,33 @@ life --demo glidergun --out glider_gun.gif --ppc 10 --pos TL -W60 -H40
 
 ## Usage
 ```
-usage: life [-h] (-i IN | -d DEMO) [-o OUT | --debug-print] [-W WIDTH] [-H HEIGHT] [-M MAX_GEN] [--ppc PPC] [-P POS] [-p]
+usage: life [-h] (-i GRID_INPUT | -d DEMO) [-o FILE | --debug-print]
+            [-W WIDTH] [-H HEIGHT] [-M MAX_GEN] [--ppc PIXELS] [-P POSITION]
+            [-p]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i IN, --in IN
-  -d DEMO, --demo DEMO
-  -o OUT, --out OUT
-  --debug-print
+  -i GRID_INPUT, --in GRID_INPUT
+                        Parse the initial grid from <GRID_INPUT>
+  -d DEMO, --demo DEMO  Try one of the provided demos: one of 'glidergun' and
+                        'glidergen'
+  -o FILE, --out FILE   Place the output into <FILE>
+  --debug-print         Print the generated frames directly to the terminal,
+                        instead of saving them
 
   -W WIDTH, --width WIDTH
+                        Width of the grid
   -H HEIGHT, --height HEIGHT
+                        Height of the grid
 
   -M MAX_GEN, --max-gen MAX_GEN
-  --ppc PPC
-  -P POS, --pos POS
+                        Number of generations to simulate
+  --ppc PIXELS          Set the width and the height of each cell to <PIXELS>
+  -P POSITION, --pos POSITION
+                        One of 'C', 'T', 'B', 'L', 'R', 'TL', 'TR', 'BL', and
+                        'BR'
 
-  -p, --profile
+  -p, --profile         Measure the performance
 ```
 
 ## Input Format

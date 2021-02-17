@@ -242,24 +242,67 @@ def main() -> None:
     parser = argparse.ArgumentParser()
 
     input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument("-i", "--in")
-    input_group.add_argument("-d", "--demo")
+    input_group.add_argument(
+        "-i",
+        "--in",
+        metavar="GRID_INPUT",
+        help="Parse the initial grid from <GRID_INPUT>",
+    )
+    input_group.add_argument(
+        "-d",
+        "--demo",
+        help="Try one of the provided demos: one of 'glidergun' and 'glidergen'",
+    )
 
     output_group = parser.add_mutually_exclusive_group()
-    output_group.add_argument("-o", "--out", default="out.gif")
-    output_group.add_argument("--debug-print", action="store_true")
+    output_group.add_argument(
+        "-o",
+        "--out",
+        default="out.gif",
+        metavar="FILE",
+        help="Place the output into <FILE>",
+    )
+    output_group.add_argument(
+        "--debug-print",
+        action="store_true",
+        help="Print the generated frames directly to the terminal, instead of saving them",
+    )
 
     size_group = parser.add_argument_group()
-    size_group.add_argument("-W", "--width", type=int, default=100)
-    size_group.add_argument("-H", "--height", type=int, default=100)
+    size_group.add_argument(
+        "-W", "--width", type=int, default=100, help="Width of the grid"
+    )
+    size_group.add_argument(
+        "-H", "--height", type=int, default=100, help="Height of the grid"
+    )
 
     option_group = parser.add_argument_group()
-    option_group.add_argument("-M", "--max-gen", type=int, default=300)
-    option_group.add_argument("--ppc", type=int, default=1)
-    option_group.add_argument("-P", "--pos", default="C")
+    option_group.add_argument(
+        "-M",
+        "--max-gen",
+        type=int,
+        default=300,
+        help="Number of generations to simulate",
+    )
+    option_group.add_argument(
+        "--ppc",
+        type=int,
+        default=1,
+        metavar="PIXELS",
+        help="Set the width and the height of each cell to <PIXELS>",
+    )
+    option_group.add_argument(
+        "-P",
+        "--pos",
+        default="C",
+        metavar="POSITION",
+        help="One of 'C', 'T', 'B', 'L', 'R', 'TL', 'TR', 'BL', and 'BR'",
+    )
 
     dev_group = parser.add_argument_group()
-    dev_group.add_argument("-p", "--profile", action="store_true")
+    dev_group.add_argument(
+        "-p", "--profile", action="store_true", help="Measure the performance"
+    )
 
     args = parser.parse_args()
 

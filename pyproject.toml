@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "golpy"
-version = "0.1.1"
+version = "0.2.0"
 description = "Efficient Conway's Game of Life using NumPy"
 authors = ["Jay Lee <jaeho.lee@snu.ac.kr>"]
 license = "MIT"
