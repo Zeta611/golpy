@@ -1,10 +1,9 @@
 import time
 from functools import wraps
-from typing import Dict
 
 
 class timeit:
-    records: Dict[str, float] = {}
+    records: dict[str, float] = {}
     on = False
 
     def __call__(self, func):

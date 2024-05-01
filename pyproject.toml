@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "golpy"
-version = "0.2.0"
+version = "0.3.0"
 description = "Efficient Conway's Game of Life using NumPy"
 authors = ["Jay Lee <jaeho.lee@snu.ac.kr>"]
 license = "MIT"
@@ -10,12 +10,12 @@ repository = "https://github.com/zeta611/py-game-of-life"
 keywords = ["Game of Life"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-Pillow = "^8.1.0"
-numpy = "^1.20.1"
+python = "^3.9"
+Pillow = "^10.3.0"
+numpy = "^1.26.4"
 
 [tool.poetry.dev-dependencies]
-black = "^20.8b1"
+black = "^24.4"
 
 [tool.poetry.scripts]
 life = "golpy.__init__:main"

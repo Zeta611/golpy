@@ -1,4 +1,5 @@
 # GoLPy
+
 [![GitHub
 license](https://img.shields.io/github/license/Zeta611/golpy?style=flat-square)](https://github.com/Zeta611/golpy/blob/master/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/golpy?style=flat-square)](https://pypi.org/project/golpy/)
@@ -7,7 +8,9 @@ license](https://img.shields.io/github/license/Zeta611/golpy?style=flat-square)]
 GoLPy is an efficient Conway's Game of Life implemented in Python using NumPy.
 
 ## Example Output
+
 The following GIF can be generated using the command:
+
 ```sh
 life --demo glidergun --out glider_gun.gif --ppc 10 --pos TL -W60 -H40
 ```
@@ -15,12 +18,14 @@ life --demo glidergun --out glider_gun.gif --ppc 10 --pos TL -W60 -H40
 ![The Gosper Glider Gun](glider_gun.gif)
 
 ## Installation
-```
+
+```sh
 pip install golpy
 ```
 
 ## Usage
-```
+
+```sh
 usage: life [-h] (-i GRID_INPUT | -d DEMO) [-o FILE | --debug-print]
             [-W WIDTH] [-H HEIGHT] [-M MAX_GEN] [--ppc PIXELS] [-P POSITION]
             [-p]
@@ -50,8 +55,15 @@ optional arguments:
   -p, --profile         Measure the performance
 ```
 
-## Input Format
+To use without installing,
+
+```sh
+python -m golpy # ...
 ```
+
+## Input Format
+
+```txt
 ........................O
 ......................O.O
 ............OO......OO............OO
@@ -66,4 +78,5 @@ OO........O...O.OO....O.O
 Use `.` for a dead cell, `O` (`chr(79)`) for a live cell.
 
 ## License
+
 [MIT](LICENSE)

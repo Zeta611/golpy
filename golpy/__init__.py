@@ -2,7 +2,7 @@ import argparse
 import functools
 import textwrap
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Callable
 
 import numpy as np
 from PIL import Image
@@ -125,7 +125,7 @@ def grid_print(grid: np.ndarray, generation: int) -> None:
 
 @timeit()
 def parse_grid(
-    text: str, size: Tuple[int, int], pos: str = "C", live: str = "O"
+    text: str, size: tuple[int, int], pos: str = "C", live: str = "O"
 ) -> np.ndarray:
     lines = textwrap.dedent(text).strip().splitlines()
     text_width = max(len(line) for line in lines)
@@ -139,7 +139,7 @@ def parse_grid(
 
     grid = np.zeros((height, width), dtype="uint8")
 
-    pos_idx: Dict[str, Tuple[int, int]] = {
+    pos_idx: dict[str, tuple[int, int]] = {
         "C": (height // 2 - text_height // 2, width // 2 - text_width // 2),
         "T": (0, width // 2 - text_width // 2),
         "B": (height - text_height, width // 2 - text_width // 2),
@@ -166,7 +166,7 @@ def parse_grid(
 def add_grid_frame(
     grid: np.ndarray,
     generation: int,
-    grid_frames: List[np.ndarray],
+    grid_frames: list[np.ndarray],
     pixels_per_cell: int,
 ) -> None:
     """Add the grid to the grid_frames"""
@@ -185,7 +185,7 @@ def enlarge_image(image: np.ndarray, ratio: int) -> np.ndarray:
 
 @timeit()
 def save_frames(
-    grid_frames: List[Image.Image], filename: str, duration: int = 50
+    grid_frames: list[Image.Image], filename: str, duration: int = 50
 ) -> None:
     grid_frames[0].save(
         filename,
@@ -196,7 +196,7 @@ def save_frames(
     )
 
 
-def get_demo(name: str, size: Tuple[int, int], pos: str = "C") -> np.ndarray:
+def get_demo(name: str, size: tuple[int, int], pos: str = "C") -> np.ndarray:
     if name == "random":
         return np.random.randint(0, 2, size, dtype="uint8")
 
@@ -321,7 +321,7 @@ def main() -> None:
         grid = get_demo(args.demo, size, pos)
 
     # Run Game of Life
-    grid_frames: List[Image.Image] = []
+    grid_frames: list[Image.Image] = []
 
     if args.debug_print:
         driver(grid, handler=grid_print, max_gen=max_gen)
